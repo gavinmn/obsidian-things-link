@@ -33,34 +33,26 @@ export default class MyPlugin extends Plugin {
 
 						const thingsDeepLink = `things:///show?query=${fileTitleForURL}`;
 
+						window.open(thingsURL);
+						window.open(thingsDeepLink);
+
 						async function getFileText(): Promise<string> {
 							const text = await vault.read(workspace.getActiveFile())
 							return text
 						} 
 
 						getFileText().then(text => {
-							//parse text and insert thingsDeepLink after the H1
 							const lines = text.split('\n');
 							const h1Index = lines.findIndex(line => line.startsWith('#'));
 							if (h1Index !== -1) {
-								lines.splice(h1Index + 1, 0, `\n${thingsDeepLink}`);
+								lines.splice(h1Index + 1, 0, `\n[Things](${thingsDeepLink})`);
 								const newText = lines.join('\n');
-								// vault.write(workspace.getActiveFile(), newText);
-								console.log(newText);
-							}
 
+								vault.modify(workspace.getActiveFile(), newText);
+							}
 						});
 
-
-
-						// this.app.vault.modify(this.app.workspace.getActiveFile(), 
-
-
-
-						//`\n\n[Things](${thingsDeepLink})\n\n`
 						
-						// window.open(thingsURL);
-						// window.open(thingsDeepLink);
 					}
 					return true;
 				}

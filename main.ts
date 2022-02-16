@@ -19,19 +19,41 @@ export default class MyPlugin extends Plugin {
 				const leaf = this.app.workspace.activeLeaf;
 				if (leaf) {
 					if (!checking) {
-						const fileTitle = this.app.workspace.getActiveFile().name.split('.')[0].replace(/\s/, '%20');
 
-						const vaultName = this.app.vault.getName();
+						const vault = this.app.vault;
+						const workspace = this.app.workspace;
 
-						const obsidianDeepLink = `obsidian://open?vault=${vaultName}&file=${fileTitle}`;
+						const fileTitleForURL = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%20');
 
-						const thingsURL = `things:///add-project?title=${fileTitle}&notes=${obsidianDeepLink}`;
+						const vaultName = vault.getName();
 
-						const thingsDeepLink = `things:///show?query=${fileTitle}`;
+						const obsidianDeepLink = `obsidian://open?vault=${vaultName}&file=${fileTitleForURL}`;
 
-						const fileText = this.app.vault.read(this.app.workspace.getActiveFile()).then(text => {
-							console.log(text)
+						const thingsURL = `things:///add-project?title=${fileTitleForURL}&notes=${obsidianDeepLink}`;
+
+						const thingsDeepLink = `things:///show?query=${fileTitleForURL}`;
+
+						async function getFileText(): Promise<string> {
+							const text = await vault.read(workspace.getActiveFile())
+							return text
+						} 
+
+						getFileText().then(text => {
+							//parse text and insert thingsDeepLink after the H1
+							const lines = text.split('\n');
+							const h1Index = lines.findIndex(line => line.startsWith('#'));
+							if (h1Index !== -1) {
+								lines.splice(h1Index + 1, 0, `\n${thingsDeepLink}`);
+								const newText = lines.join('\n');
+								// vault.write(workspace.getActiveFile(), newText);
+								console.log(newText);
+							}
+
 						});
+
+
+
+						// this.app.vault.modify(this.app.workspace.getActiveFile(), 
 
 
 

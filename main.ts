@@ -1,15 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
-
 export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
 
 	async onload() {
 		this.addCommand({
@@ -51,7 +42,6 @@ export default class MyPlugin extends Plugin {
 								vault.modify(workspace.getActiveFile(), newText);
 							}
 						});
-
 						
 					}
 					return true;

@@ -29,10 +29,16 @@ export default class MyPlugin extends Plugin {
 
 						const thingsDeepLink = `things:///show?query=${fileTitle}`;
 
+						const fileText = this.app.vault.read(this.app.workspace.getActiveFile()).then(text => {
+							console.log(text)
+						});
+
+
+
 						//`\n\n[Things](${thingsDeepLink})\n\n`
 						
-						window.open(thingsURL);
-						window.open(thingsDeepLink);
+						// window.open(thingsURL);
+						// window.open(thingsDeepLink);
 					}
 					return true;
 				}

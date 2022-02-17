@@ -22,8 +22,6 @@ export default class MyPlugin extends Plugin {
 
 						const obsidianDeepLink = `obsidian://open?vault=${vaultName}%26file=${fileTitleForURL}`;
 
-						console.log(obsidianDeepLink);
-
 						const thingsURL = `things:///add-project?title=${fileTitleForProject}&notes=${obsidianDeepLink}`;
 
 						const thingsDeepLink = `things:///show?query=${fileTitleForProject}`;

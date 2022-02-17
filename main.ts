@@ -44,6 +44,11 @@ export default class MyPlugin extends Plugin {
 								const newText = lines.join('\n');
 
 								vault.modify(workspace.getActiveFile(), newText);
+							} else {
+								lines.splice(0, 0, `\n[Things](${thingsDeepLink})`);
+								const newText = lines.join('\n');
+
+								vault.modify(workspace.getActiveFile(), newText);
 							}
 						});
 						

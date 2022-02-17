@@ -1,7 +1,7 @@
 {
 	"id": "things-link",
 	"name": "Things Link",
-	"version": "1.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.12.0",
 	"description": "Seamlessly link an Obsidian Note to a Things Project",
 	"author": "@gavmn",

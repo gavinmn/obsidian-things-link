@@ -7,8 +7,8 @@ export default class MyPlugin extends Plugin {
 			id: 'link-to-things',
 			name: 'Link to Things',
 			checkCallback: (checking: boolean) => {
-				const leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (view) {
 					if (!checking) {
 
 						const vault = this.app.vault;
@@ -29,14 +29,23 @@ export default class MyPlugin extends Plugin {
 						const thingsDeepLink = `things:///show?query=${fileTitleForProject}`;
 
 						window.open(thingsURL);
-						window.open(thingsDeepLink);
+						setTimeout(() => {
+							window.open(thingsDeepLink);
+						}, 500);
 
 						async function getFileText(): Promise<string> {
-							const text = await vault.read(workspace.getActiveFile())
-							return text
+							try {
+								const text = await vault.read(workspace.getActiveFile())
+								return text
+							}
+							catch (e) {
+								console.log(e);
+    							return null;
+							}
 						} 
 
-						getFileText().then(text => {
+						(async () => {
+							const text = await getFileText();
 							const lines = text.split('\n');
 							const h1Index = lines.findIndex(line => line.startsWith('#'));
 							if (h1Index !== -1) {
@@ -50,7 +59,7 @@ export default class MyPlugin extends Plugin {
 
 								vault.modify(workspace.getActiveFile(), newText);
 							}
-						});
+						})();
 						
 					}
 					return true;

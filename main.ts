@@ -15,12 +15,7 @@ function getCurrentLine() {
 }
 
 function prepareLine(line: string) {
-	line = line.replace(/^-/gm, '')
-	line = line.replace(/^\*/gm, '')
-	line = line.replace(/^#/gm, '')
-	line = line.replace(/^_/gm, '')
-	line = line.replace(/^>/gm, '')
-	line = line.replace(/^\t/gm, '')
+	line = line.replace(/[^\w\s]/gi, '')
 	line = line.trim()
 	return line
 }
@@ -122,25 +117,28 @@ export default class MyPlugin extends Plugin {
 
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 			
+			const currentLine = getCurrentLine()
+			
+
+			const firstLetterIndex = currentLine.search(/[a-zA-Z]|[0-9]/);
+			console.log(firstLetterIndex)
+
+			const line = currentLine.substring(firstLetterIndex, currentLine.length)
+			
 			let editorPosition = view.editor.getCursor()
 			const lineLength = view.editor.getLine(editorPosition.line).length
-
+			
 			let startRange: EditorPosition = {
 				line: editorPosition.line,
-				ch: 0
+				ch: firstLetterIndex
 			}
 			
 			let endRange: EditorPosition = {
 				line: editorPosition.line,
 				ch: lineLength
 			}
-
-			console.log(startRange, endRange);
-
-
-			const currentLine = getCurrentLine()
 			
-			view.editor.replaceRange(`[${currentLine}](things:///show?id=${thingsID})`, startRange, endRange);
+			view.editor.replaceRange(`[${line}](things:///show?id=${thingsID})`, startRange, endRange);
 		});
 	
 		

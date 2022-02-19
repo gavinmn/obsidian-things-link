@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
+import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
@@ -7,6 +7,47 @@ function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	return link;
 }
 
+function getCurrentLine() {
+	const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+	const lineNumber = view.editor.getCursor().line
+	const lineText = view.editor.getLine(lineNumber)
+	return lineText
+}
+
+function prepareLine(line: string) {
+	line = line.replace(/^-/gm, '')
+	line = line.replace(/^\*/gm, '')
+	line = line.replace(/^#/gm, '')
+	line = line.replace(/^_/gm, '')
+	line = line.replace(/^>/gm, '')
+	line = line.replace(/^\t/gm, '')
+	line = line.trim()
+	return line
+}
+
+function encodeLine(line: string) {
+	line = line.replace(/\s/g, '%20')
+	line = line.replace(/\:/g, '%3A')
+	line = line.replace(/\//g, '%2F')
+	line = line.replace(/\?/g, '%3F')
+	line = line.replace(/\=/g, '%3D')
+	line = line.replace(/\#/g, '%23')
+	line = line.replace(/\@/g, '%40')
+	line = line.replace(/\$/g, '%24')
+	line = line.replace(/\^/g, '%5E')
+	line = line.replace(/\&/g, '%26')
+	line = line.replace(/\+/g, '%2B')
+	line = line.replace(/\:/g, '%3A')
+	line = line.replace(/\;/g, '%3B')
+	line = line.replace(/\</g, '%3C')
+	line = line.replace(/\>/g, '%3E')
+	return line
+}
+
+function createTask(line: string, deepLink: string) {
+	const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://things-id`
+	window.open(task);
+}
 
 
 export default class MyPlugin extends Plugin {
@@ -77,8 +118,31 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.registerObsidianProtocolHandler("things-id", async (id) => {
-			console.log(id['x-things-id'])
+			const thingsID = id['x-things-id'];
+
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+			
+			let editorPosition = view.editor.getCursor()
+			const lineLength = view.editor.getLine(editorPosition.line).length
+
+			let startRange: EditorPosition = {
+				line: editorPosition.line,
+				ch: 0
+			}
+			
+			let endRange: EditorPosition = {
+				line: editorPosition.line,
+				ch: lineLength
+			}
+
+			console.log(startRange, endRange);
+
+
+			const currentLine = getCurrentLine()
+			
+			view.editor.replaceRange(`[${currentLine}](things:///show?id=${thingsID})`, startRange, endRange);
 		});
+	
 		
 		this.addCommand({
 			id: 'create-things-task',
@@ -88,49 +152,6 @@ export default class MyPlugin extends Plugin {
 				if (view) {
 					if (!checking) {
 
-						function getCurrentLine() {
-							const lineNumber = view.editor.getCursor().line
-							const lineText = view.editor.getLine(lineNumber)
-							return lineText
-						}
-
-						function prepareLine(line: string) {
-							line = line.replace(/^-/gm, '')
-							line = line.replace(/^\*/gm, '')
-							line = line.replace(/^#/gm, '')
-							line = line.replace(/^_/gm, '')
-							line = line.replace(/^>/gm, '')
-							line = line.replace(/^\t/gm, '')
-							line = line.trim()
-							return line
-						}
-
-						function encodeLine(line: string) {
-							// return encodeURI(line)
-							line = line.replace(/\s/g, '%20')
-							line = line.replace(/\:/g, '%3A')
-							line = line.replace(/\//g, '%2F')
-							line = line.replace(/\?/g, '%3F')
-							line = line.replace(/\=/g, '%3D')
-							line = line.replace(/\#/g, '%23')
-							line = line.replace(/\@/g, '%40')
-							line = line.replace(/\$/g, '%24')
-							line = line.replace(/\^/g, '%5E')
-							line = line.replace(/\&/g, '%26')
-							line = line.replace(/\+/g, '%2B')
-							line = line.replace(/\:/g, '%3A')
-							line = line.replace(/\;/g, '%3B')
-							line = line.replace(/\</g, '%3C')
-							line = line.replace(/\>/g, '%3E')
-							return line
-						}
-						
-						function createTask(line: string, deepLink: string) {
-							const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://things-id`
-							window.open(task);
-							
-						}
-
 						const vault = this.app.vault;
 						const workspace = this.app.workspace;
 						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
@@ -139,7 +160,6 @@ export default class MyPlugin extends Plugin {
 						const cleanedLine = prepareLine(task)
 						const encodedLine = encodeLine(cleanedLine)
 						createTask(encodedLine, obsidianDeepLink)
-						
 					
 					}
 					return true

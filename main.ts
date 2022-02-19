@@ -13,10 +13,6 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 
-
-		this.registerObsidianProtocolHandler("things-id", (id) => { console.log(id) })
-		
-
 		this.addCommand({
 			id: 'create-things-project',
 			name: 'Create Things Project',
@@ -80,6 +76,10 @@ export default class MyPlugin extends Plugin {
 			}
 		});
 
+		this.registerObsidianProtocolHandler("things-id", async (id) => {
+			console.log(id['x-things-id'])
+		});
+		
 		this.addCommand({
 			id: 'create-things-task',
 			name: 'Create Things Task',
@@ -125,28 +125,20 @@ export default class MyPlugin extends Plugin {
 							return line
 						}
 						
-
-						function test(id: string) {
-							console.log(id)
-						}
-
-						
 						function createTask(line: string, deepLink: string) {
 							const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://things-id`
 							window.open(task);
+							
 						}
-
-						
 
 						const vault = this.app.vault;
 						const workspace = this.app.workspace;
 						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
-
+						
 						const task = getCurrentLine()
 						const cleanedLine = prepareLine(task)
 						const encodedLine = encodeLine(cleanedLine)
 						createTask(encodedLine, obsidianDeepLink)
-
 						
 					
 					}
@@ -155,6 +147,7 @@ export default class MyPlugin extends Plugin {
 				return false;
 			}
 		});
+			
 	}
 
 	onunload() {

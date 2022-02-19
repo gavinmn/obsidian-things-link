@@ -12,6 +12,11 @@ function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 export default class MyPlugin extends Plugin {
 
 	async onload() {
+
+
+		this.registerObsidianProtocolHandler("things-id", (id) => { console.log(id) })
+		
+
 		this.addCommand({
 			id: 'create-things-project',
 			name: 'Create Things Project',
@@ -83,13 +88,13 @@ export default class MyPlugin extends Plugin {
 				if (view) {
 					if (!checking) {
 
-						function getCurrentLine(){
+						function getCurrentLine() {
 							const lineNumber = view.editor.getCursor().line
 							const lineText = view.editor.getLine(lineNumber)
 							return lineText
 						}
 
-						function prepareLine(line:string) {
+						function prepareLine(line: string) {
 							line = line.replace(/^-/gm, '')
 							line = line.replace(/^\*/gm, '')
 							line = line.replace(/^#/gm, '')
@@ -119,23 +124,19 @@ export default class MyPlugin extends Plugin {
 							line = line.replace(/\>/g, '%3E')
 							return line
 						}
+						
 
-						function createTask(line: string, deepLink: string) {
-							// const task = `things:///add?title=${line}&notes=${deepLink}`
-							// window.open(task);
-
-							const { exec } = require('child_process');
-							var cmd = 'open things:///add?title=task&notes=note&x-success=x-things-id';
-
-							exec(cmd, (error: any, stdout: any, stderr: any) => {
-								if (error) {
-									console.error(`error: ${error.message}`);
-									return;
-								}
-							});
+						function test(id: string) {
+							console.log(id)
 						}
 
+						
+						function createTask(line: string, deepLink: string) {
+							const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://things-id`
+							window.open(task);
+						}
 
+						
 
 						const vault = this.app.vault;
 						const workspace = this.app.workspace;

@@ -1,4 +1,13 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
+
+function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
+	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
+	const vaultName = vault.getName();
+	const link = `obsidian://open?vault=${vaultName}%26file=${fileTitle}`;
+	return link;
+}
+
+
 
 export default class MyPlugin extends Plugin {
 
@@ -73,10 +82,7 @@ export default class MyPlugin extends Plugin {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (view) {
 					if (!checking) {
-						const vault = this.app.vault;
-						const workspace = this.app.workspace;
-					
-						
+
 						function getCurrentLine(){
 							const lineNumber = view.editor.getCursor().line
 							const lineText = view.editor.getLine(lineNumber)
@@ -95,6 +101,7 @@ export default class MyPlugin extends Plugin {
 						}
 
 						function encodeLine(line: string) {
+							// return encodeURI(line)
 							line = line.replace(/\s/g, '%20')
 							line = line.replace(/\:/g, '%3A')
 							line = line.replace(/\//g, '%2F')
@@ -113,16 +120,33 @@ export default class MyPlugin extends Plugin {
 							return line
 						}
 
-						function createTask(line: string) {
-							const task = `things:///add?title=${line}`
-							console.log(task)
-							window.open(task);
+						function createTask(line: string, deepLink: string) {
+							// const task = `things:///add?title=${line}&notes=${deepLink}`
+							// window.open(task);
+
+							const { exec } = require('child_process');
+							var cmd = 'open things:///add?title=task&notes=note&x-success=x-things-id';
+
+							exec(cmd, (error: any, stdout: any, stderr: any) => {
+								if (error) {
+									console.error(`error: ${error.message}`);
+									return;
+								}
+							});
 						}
+
+
+
+						const vault = this.app.vault;
+						const workspace = this.app.workspace;
+						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
 
 						const task = getCurrentLine()
 						const cleanedLine = prepareLine(task)
 						const encodedLine = encodeLine(cleanedLine)
-						createTask(encodedLine)
+						createTask(encodedLine, obsidianDeepLink)
+
+						
 					
 					}
 					return true

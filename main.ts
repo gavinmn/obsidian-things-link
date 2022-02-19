@@ -1,4 +1,5 @@
 import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
+import { encode } from 'punycode';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
@@ -14,9 +15,11 @@ function getCurrentLine() {
 	return lineText
 }
 
-function prepareLine(line: string) {
-	line = line.replace(/[^\w\s]/gi, '')
+function prepareTask(line: string) {
 	line = line.trim()
+	//remove all leading non-alphanumeric characters
+	line = line.replace(/^\W+|\W+$/, '')
+	line = encodeLine(line)
 	return line
 }
 
@@ -121,7 +124,6 @@ export default class MyPlugin extends Plugin {
 			
 
 			const firstLetterIndex = currentLine.search(/[a-zA-Z]|[0-9]/);
-			console.log(firstLetterIndex)
 
 			const line = currentLine.substring(firstLetterIndex, currentLine.length)
 			
@@ -154,18 +156,15 @@ export default class MyPlugin extends Plugin {
 						const workspace = this.app.workspace;
 						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
 						
-						const task = getCurrentLine()
-						const cleanedLine = prepareLine(task)
-						const encodedLine = encodeLine(cleanedLine)
-						createTask(encodedLine, obsidianDeepLink)
-					
+						const line = getCurrentLine()
+						const task = prepareTask(line)
+						createTask(task, obsidianDeepLink)
 					}
 					return true
 				}
 				return false;
 			}
 		});
-			
 	}
 
 	onunload() {

@@ -61,14 +61,11 @@ export default class MyPlugin extends Plugin {
 					if (!checking) {
 
 						const vault = this.app.vault;
-						const vaultName = vault.getName();
 						const workspace = this.app.workspace;
 
 						const projectTitle = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%20');
 
-						const noteForDeepLink = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%2520');
-
-						const obsidianDeepLink = `obsidian://open?vault=${vaultName}%26file=${noteForDeepLink}`;
+						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
 
 						const thingsURL = `things:///add-project?title=${projectTitle}&notes=${obsidianDeepLink}`;
 

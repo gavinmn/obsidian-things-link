@@ -1,10 +1,17 @@
 import { Editor, EditorPosition, MarkdownView, Plugin, Vault, Workspace } from 'obsidian';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
-	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
-	const vaultName = vault.getName();
-	const link = `obsidian://open?vault=${vaultName}%26file=${fileTitle}`;
-	return link;
+	if (workspace.getActiveFile() != null) {
+		const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
+		const vaultName = vault.getName();
+		const link = `obsidian://open?vault=${vaultName}%26file=${fileTitle}`;
+		return link;
+	} else {
+		const fileTitle = 'Untitled';
+		const vaultName = vault.getName();
+		const link = `obsidian://open?vault=${vaultName}%26file=${fileTitle}`;
+		return link;
+	}
 }
 
 function getCurrentLine(editor: Editor, view: MarkdownView) {

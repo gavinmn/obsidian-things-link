@@ -1,9 +1,9 @@
 {
-	"id": "things-link",
+	"id": "obsidian-things-link",
 	"name": "Things Link",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"minAppVersion": "0.12.0",
-	"description": "Seamlessly link an Obsidian Note to a Things Project",
+	"description": "Seamlessly create Things tasks and projects from Obsidian",
 	"author": "@gavmn",
 	"authorUrl": "https://twitter.com/gavmn",
 	"isDesktopOnly": false

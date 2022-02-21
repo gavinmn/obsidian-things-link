@@ -1,4 +1,4 @@
-import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
+import { Editor, EditorPosition, MarkdownView, Plugin, Vault, Workspace } from 'obsidian';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');

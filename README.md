@@ -1,5 +1,9 @@
-# Link to Things
+# Things Link
 
-An Obsidian plugin to seamlessly link an Obsidian note and a Things project.
+Seamlessly create Things tasks and projects from Obsidian.
 
-Running this plugin will create a new Things project with the same title as the current Obsidian note, and add deeplinks to both the Things project and Obsidian note for easy navigation between the two.
+## Commands
+
+`Create Things Project` will create a new Things project from the current note and add deeplinks between the two for easy navitagion.
+
+`Create Things Task` will create a new Things task in the Inbox from the current line in the Obsidian note and add deeplinks between the two for easy navigation.

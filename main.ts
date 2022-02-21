@@ -61,53 +61,54 @@ export default class MyPlugin extends Plugin {
 					if (!checking) {
 
 						const vault = this.app.vault;
+						const vaultName = vault.getName();
 						const workspace = this.app.workspace;
 
-						const fileTitleForProject = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%20');
+						const projectTitle = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%20');
 
-						const fileTitleForURL = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
+						const noteForDeepLink = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%2520');
 
-						const vaultName = vault.getName();
+						const obsidianDeepLink = `obsidian://open?vault=${vaultName}%26file=${noteForDeepLink}`;
 
-						const obsidianDeepLink = `obsidian://open?vault=${vaultName}%26file=${fileTitleForURL}`;
+						const thingsURL = `things:///add-project?title=${projectTitle}&notes=${obsidianDeepLink}`;
 
-						const thingsURL = `things:///add-project?title=${fileTitleForProject}&notes=${obsidianDeepLink}`;
-
-						const thingsDeepLink = `things:///show?query=${fileTitleForProject}`;
+						const thingsDeepLink = `things:///show?query=${projectTitle}`;
 
 						window.open(thingsURL);
 						setTimeout(() => {
 							window.open(thingsDeepLink);
 						}, 500);
-
-						async function getFileText(): Promise<string> {
-							try {
-								const text = await vault.read(workspace.getActiveFile())
-								return text
-							}
-							catch (e) {
-								console.log(e);
-    							return null;
-							}
-						} 
-
-						(async () => {
-							const text = await getFileText();
-							const lines = text.split('\n');
-							const h1Index = lines.findIndex(line => line.startsWith('#'));
-							if (h1Index !== -1) {
-								lines.splice(h1Index + 1, 0, `\n[Things](${thingsDeepLink})`);
-								const newText = lines.join('\n');
-
-								vault.modify(workspace.getActiveFile(), newText);
-							} else {
-								lines.splice(0, 0, `\n[Things](${thingsDeepLink})`);
-								const newText = lines.join('\n');
-
-								vault.modify(workspace.getActiveFile(), newText);
-							}
-						})();
 						
+						let fileText = view.editor.getValue()
+						const lines = fileText.split('\n');
+						const h1Index = lines.findIndex(line => line.startsWith('#'));
+						if (h1Index !== -1) {
+
+							let startRange: EditorPosition = {
+								line: h1Index,
+								ch:lines[h1Index].length
+							}
+
+							let endRange: EditorPosition = {
+								line: h1Index,
+								ch:lines[h1Index].length
+							}
+
+							view.editor.replaceRange(`\n\n[Things](${thingsDeepLink})`, startRange, endRange);
+
+						} else {
+								let startRange: EditorPosition = {
+								line: 0,
+								ch:0
+							}
+
+							let endRange: EditorPosition = {
+								line: 0,
+								ch:0
+							}
+
+							view.editor.replaceRange(`[Things](${thingsDeepLink})\n\n`, startRange, endRange);
+						}
 					}
 					return true;
 				}
@@ -121,7 +122,6 @@ export default class MyPlugin extends Plugin {
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 			
 			const currentLine = getCurrentLine()
-			
 
 			const firstLetterIndex = currentLine.search(/[a-zA-Z]|[0-9]/);
 

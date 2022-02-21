@@ -1,5 +1,4 @@
 import { App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Vault, Workspace } from 'obsidian';
-import { encode } from 'punycode';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	const fileTitle = workspace.getActiveFile().name.split('.')[0].split(/\s/).join('%2520');
@@ -8,10 +7,9 @@ function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
 	return link;
 }
 
-function getCurrentLine() {
-	const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-	const lineNumber = view.editor.getCursor().line
-	const lineText = view.editor.getLine(lineNumber)
+function getCurrentLine(editor: Editor, view: MarkdownView) {
+	const lineNumber = editor.getCursor().line
+	const lineText = editor.getLine(lineNumber)
 	return lineText
 }
 
@@ -51,65 +49,58 @@ function createTask(line: string, deepLink: string) {
 export default class MyPlugin extends Plugin {
 
 	async onload() {
-
+		
 		this.addCommand({
 			id: 'create-things-project',
 			name: 'Create Things Project',
-			checkCallback: (checking: boolean) => {
-				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					if (!checking) {
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				
+				const vault = this.app.vault;
+				const workspace = this.app.workspace;
 
-						const vault = this.app.vault;
-						const workspace = this.app.workspace;
+				const projectTitle = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%20');
 
-						const projectTitle = workspace.getActiveFile().basename.split('.')[0].split(/\s/).join('%20');
+				const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
 
-						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
+				const thingsURL = `things:///add-project?title=${projectTitle}&notes=${obsidianDeepLink}`;
 
-						const thingsURL = `things:///add-project?title=${projectTitle}&notes=${obsidianDeepLink}`;
+				const thingsDeepLink = `things:///show?query=${projectTitle}`;
 
-						const thingsDeepLink = `things:///show?query=${projectTitle}`;
+				window.open(thingsURL);
+				setTimeout(() => {
+					window.open(thingsDeepLink);
+				}, 500);
+				
+				let fileText = editor.getValue()
+				const lines = fileText.split('\n');
+				const h1Index = lines.findIndex(line => line.startsWith('#'));
+				if (h1Index !== -1) {
 
-						window.open(thingsURL);
-						setTimeout(() => {
-							window.open(thingsDeepLink);
-						}, 500);
-						
-						let fileText = view.editor.getValue()
-						const lines = fileText.split('\n');
-						const h1Index = lines.findIndex(line => line.startsWith('#'));
-						if (h1Index !== -1) {
-
-							let startRange: EditorPosition = {
-								line: h1Index,
-								ch:lines[h1Index].length
-							}
-
-							let endRange: EditorPosition = {
-								line: h1Index,
-								ch:lines[h1Index].length
-							}
-
-							view.editor.replaceRange(`\n\n[Things](${thingsDeepLink})`, startRange, endRange);
-
-						} else {
-								let startRange: EditorPosition = {
-								line: 0,
-								ch:0
-							}
-
-							let endRange: EditorPosition = {
-								line: 0,
-								ch:0
-							}
-
-							view.editor.replaceRange(`[Things](${thingsDeepLink})\n\n`, startRange, endRange);
-						}
+					let startRange: EditorPosition = {
+						line: h1Index,
+						ch:lines[h1Index].length
 					}
-					return true;
+
+					let endRange: EditorPosition = {
+						line: h1Index,
+						ch:lines[h1Index].length
+					}
+
+					editor.replaceRange(`\n\n[Things](${thingsDeepLink})`, startRange, endRange);
+
+				} else {
+						let startRange: EditorPosition = {
+						line: 0,
+						ch:0
+					}
+
+					let endRange: EditorPosition = {
+						line: 0,
+						ch:0
+					}
+
+					editor.replaceRange(`[Things](${thingsDeepLink})\n\n`, startRange, endRange);
 				}
-				return false;
 			}
 		});
 
@@ -117,8 +108,9 @@ export default class MyPlugin extends Plugin {
 			const thingsID = id['x-things-id'];
 
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+			const editor = view.editor
 			
-			const currentLine = getCurrentLine()
+			const currentLine = getCurrentLine(editor, view)
 
 			const firstLetterIndex = currentLine.search(/[a-zA-Z]|[0-9]/);
 
@@ -144,22 +136,14 @@ export default class MyPlugin extends Plugin {
 		this.addCommand({
 			id: 'create-things-task',
 			name: 'Create Things Task',
-			checkCallback: (checking: boolean) => {
-				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					if (!checking) {
-
-						const vault = this.app.vault;
-						const workspace = this.app.workspace;
-						const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
-						
-						const line = getCurrentLine()
-						const task = prepareTask(line)
-						createTask(task, obsidianDeepLink)
-					}
-					return true
-				}
-				return false;
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				const vault = this.app.vault;
+				const workspace = this.app.workspace;
+				const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
+				
+				const line = getCurrentLine(editor, view)
+				const task = prepareTask(line)
+				createTask(task, obsidianDeepLink)
 			}
 		});
 	}

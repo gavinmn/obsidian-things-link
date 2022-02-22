@@ -50,7 +50,7 @@ function encodeLine(line: string) {
 
 
 function createProject(title: string, deepLink: string) {
-	const project = `things:///add-project?title=${title}&notes=${deepLink}&x-success=obsidian://task-id`
+	const project = `things:///add-project?title=${title}&notes=${deepLink}&x-success=obsidian://project-id`
 	window.open(project);
 }
 
@@ -74,7 +74,7 @@ export default class MyPlugin extends Plugin {
 			const editor = view.editor
 			
 
-			const thingsDeepLink = `things:///show?query=${projectID}`;
+			const thingsDeepLink = `things:///show?id=${projectID}`;
 			
 			let fileText = editor.getValue()
 			const lines = fileText.split('\n');

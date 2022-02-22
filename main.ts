@@ -1,3 +1,4 @@
+import { create } from 'domain';
 import { Editor, EditorPosition, MarkdownView, Plugin, Vault, Workspace } from 'obsidian';
 
 function getObsidianDeepLink(vault: Vault, workspace: Workspace) {
@@ -47,8 +48,14 @@ function encodeLine(line: string) {
 	return line
 }
 
+
+function createProject(title: string, deepLink: string) {
+	const project = `things:///add-project?title=${title}&notes=${deepLink}&x-success=obsidian://task-id`
+	window.open(project);
+}
+
 function createTask(line: string, deepLink: string) {
-	const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://things-id`
+	const task = `things:///add?title=${line}&notes=${deepLink}&x-success=obsidian://task-id`
 	window.open(task);
 }
 
@@ -56,12 +63,58 @@ function createTask(line: string, deepLink: string) {
 export default class MyPlugin extends Plugin {
 
 	async onload() {
+
+		this.registerObsidianProtocolHandler("project-id", async (id) => {
+
+			const projectID = id['x-things-id'];
+
+			const workspace = this.app.workspace;
+			
+			const view = workspace.getActiveViewOfType(MarkdownView);
+			const editor = view.editor
+			
+
+			const thingsDeepLink = `things:///show?query=${projectID}`;
+			
+			let fileText = editor.getValue()
+			const lines = fileText.split('\n');
+			const h1Index = lines.findIndex(line => line.startsWith('#'));
+
+			if (h1Index !== -1) {
+
+				let startRange: EditorPosition = {
+					line: h1Index,
+					ch:lines[h1Index].length
+				}
+
+				let endRange: EditorPosition = {
+					line: h1Index,
+					ch:lines[h1Index].length
+				}
+
+				editor.replaceRange(`\n\n[Things](${thingsDeepLink})`, startRange, endRange);
+
+			} else {
+					let startRange: EditorPosition = {
+					line: 0,
+					ch:0
+				}
+
+				let endRange: EditorPosition = {
+					line: 0,
+					ch:0
+				}
+
+				editor.replaceRange(`[Things](${thingsDeepLink})\n\n`, startRange, endRange);
+			}
+
+		});
 		
 		this.addCommand({
 			id: 'create-things-project',
 			name: 'Create Things Project',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				
+			
 				const vault = this.app.vault;
 				const workspace = this.app.workspace;
 
@@ -69,50 +122,12 @@ export default class MyPlugin extends Plugin {
 
 				const obsidianDeepLink = getObsidianDeepLink(vault, workspace);
 
-				const thingsURL = `things:///add-project?title=${projectTitle}&notes=${obsidianDeepLink}`;
-
-				const thingsDeepLink = `things:///show?query=${projectTitle}`;
-
-				window.open(thingsURL);
-				setTimeout(() => {
-					window.open(thingsDeepLink);
-				}, 500);
-				
-				let fileText = editor.getValue()
-				const lines = fileText.split('\n');
-				const h1Index = lines.findIndex(line => line.startsWith('#'));
-				if (h1Index !== -1) {
-
-					let startRange: EditorPosition = {
-						line: h1Index,
-						ch:lines[h1Index].length
-					}
-
-					let endRange: EditorPosition = {
-						line: h1Index,
-						ch:lines[h1Index].length
-					}
-
-					editor.replaceRange(`\n\n[Things](${thingsDeepLink})`, startRange, endRange);
-
-				} else {
-						let startRange: EditorPosition = {
-						line: 0,
-						ch:0
-					}
-
-					let endRange: EditorPosition = {
-						line: 0,
-						ch:0
-					}
-
-					editor.replaceRange(`[Things](${thingsDeepLink})\n\n`, startRange, endRange);
-				}
+				createProject(projectTitle, obsidianDeepLink);
 			}
 		});
 
-		this.registerObsidianProtocolHandler("things-id", async (id) => {
-			const thingsID = id['x-things-id'];
+		this.registerObsidianProtocolHandler("task-id", async (id) => {
+			const taskID = id['x-things-id'];
 
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 			const editor = view.editor
@@ -136,7 +151,7 @@ export default class MyPlugin extends Plugin {
 				ch: lineLength
 			}
 			
-			view.editor.replaceRange(`[${line}](things:///show?id=${thingsID})`, startRange, endRange);
+			view.editor.replaceRange(`[${line}](things:///show?id=${taskID})`, startRange, endRange);
 		});
 	
 		

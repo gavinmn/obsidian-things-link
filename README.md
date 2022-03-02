@@ -1,6 +1,9 @@
 # Things Link
 
 Seamlessly create Things tasks and projects from Obsidian.
+<img width="1711" alt="thingslink" src="https://user-images.githubusercontent.com/59900904/156386765-3a5923e2-0f05-4268-952d-f971c43f3aee.png">
+
+
 
 ## Commands
 

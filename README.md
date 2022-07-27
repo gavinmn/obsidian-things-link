@@ -1,4 +1,4 @@
-**This repo is unsupported. Please feel free to fork :)**
+**This project is currently unsupported. Please feel free to fork :)**
 
 # Things Link
 

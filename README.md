@@ -1,3 +1,5 @@
+**This repo is unsupported. Please feel free to fork :)**
+
 # Things Link
 
 Seamlessly create [Things](https://culturedcode.com/things/) tasks and projects from Obsidian.

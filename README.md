@@ -1,4 +1,6 @@
-**This project is currently unsupported. Please feel free to fork :)**
+A supported fork of this plugin can be found at https://github.com/danielh-official/obsidian-things-link-2
+
+*This project is currently unsupported. Please feel free to fork :)*
 
 # Things Link
 
